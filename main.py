@@ -1,5 +1,6 @@
 import os 
 from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 import argparse
 
@@ -16,21 +17,29 @@ def main():
 
     parser = argparse.ArgumentParser(description="Chatbot")
     parser.add_argument("user_prompt", type=str, help="User prompt")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
     args = parser.parse_args()
 
-    print("args ", args)
+    messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
+
+    # print ("message ", messages)
+    # print("args ", args)
     response = client.models.generate_content(
         model="gemini-2.5-flash",
-        contents=args.user_prompt
+        contents=messages
     )
 
     if not response.usage_metadata:
         raise RuntimeError("API request failed, not sage meta data found")
-    
-    print("Prompt tokens: ", response.usage_metadata.total_token_count)
+    # If the --verbose flag is included, the console output should include:
+    if (args.verbose):
 
-    if response.usage_metadata.candidates_token_count:
-        print("Response tokens: ", response.usage_metadata.candidates_token_count)
+        print("User prompt: ", args.user_prompt)
+
+        print("Prompt tokens: ", response.usage_metadata.total_token_count)
+
+        if response.usage_metadata.candidates_token_count:
+            print("Response tokens: ", response.usage_metadata.candidates_token_count)
         
         # response.usage_metadata.candidates_token_count
     # print(response)
